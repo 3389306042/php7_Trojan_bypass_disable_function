@@ -6,11 +6,11 @@
 
 程序功能设计如下：  
 1.shell管理  
-连接shell  
-添加shell  
-编辑shell  
-删除shell  
-清空shell
+a.连接shell  
+b.添加shell  
+c.编辑shell  
+d.删除shell  
+e.清空shell
 
 2.文件管理  
 a.更新  
@@ -28,7 +28,5 @@ f.删除文件
   d.强制关机  
   e.格式化C盘  
   f.开启3389  
-  g.中文检测  
-  h.联系作者  
-  i.退出程序  
-  j.待添加  
+  g.联系作者  
+  h.退出程序    
