@@ -6,6 +6,12 @@
 
 程序功能设计如下：  
 1.shell管理  
+连接shell  
+添加shell  
+编辑shell  
+删除shell  
+清空shell
+
 2.文件管理  
 a.更新  
 b.上传  
