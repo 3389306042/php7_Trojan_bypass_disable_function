@@ -5,23 +5,23 @@
 
 
 程序功能设计如下：  
-1.shell管理  
+一、shell管理  
 a.连接shell(ok)  
 b.添加shell  
 c.编辑shell  
 d.删除shell  
 e.清空shell
 
-2.文件管理  
+二、文件管理  
 a.更新(ok)  
 b.上传  
 c.下载  
 e.重命名  
 f.删除文件  
 
-3.虚拟终端（命令执行）(ok)  
+三、虚拟终端（命令执行）(ok)  
 
-4.快捷功能  
+四、快捷功能  
   a.查询用户  
   b.添加用户  
   c.修改密码  
@@ -30,4 +30,4 @@ f.删除文件
   f.开启3389  
   g.联系作者  
   h.退出程序    
-5.bypass_disable_function  
+五、bypass_disable_function  
