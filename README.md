@@ -30,3 +30,4 @@ f.删除文件
   f.开启3389  
   g.联系作者  
   h.退出程序    
+5.bypass_disable_function  
