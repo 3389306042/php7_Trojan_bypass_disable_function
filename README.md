@@ -7,7 +7,7 @@
 程序功能设计如下：  
 一、shell管理  
 a.连接shell(ok)  
-b.添加shell  
+b.添加shell(ok)  
 c.编辑shell  
 d.删除shell  
 e.清空shell
