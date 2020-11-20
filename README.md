@@ -6,23 +6,23 @@
 
 程序功能设计如下：  
 一、shell管理  
-a.连接shell(ok)  
-b.添加shell(ok)  
+a.连接shell (ok)  
+b.添加shell (ok)  
 c.编辑shell  
-d.删除shell  
+d.删除shell (ok)  
 e.清空shell
 
 二、文件管理  
-a.更新(ok)  
+a.更新  (ok)  
 b.上传  
-c.下载  
+c.下载  (ok)  
 e.重命名  
 f.删除文件  
 
 三、虚拟终端（命令执行）(ok)  
 
 四、快捷功能  
-  a.查询用户  
+  a.查询用户  (ok)    
   b.添加用户  
   c.修改密码  
   d.强制关机  
