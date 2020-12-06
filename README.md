@@ -8,9 +8,9 @@
 一、shell管理  
 a.连接shell (ok)  
 b.添加shell (ok)  
-c.编辑shell  
+c.编辑shell (ok)  
 d.删除shell (ok)  
-e.清空shell
+e.清空shell (ok)  
 
 二、文件管理  
 a.更新  (ok)  
