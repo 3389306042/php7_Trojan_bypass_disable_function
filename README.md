@@ -3,6 +3,11 @@
 本项目将UI和后端实现分离进行，目前UI由两人负责，后端由一人负责  
 项目初步计划是先完成类似蚁剑的链接模块和view模块，然后在进行bypass disable_function模块的开发工作 
 
+项目目录说明：  
+first.ui：程序主窗口界面  
+Wchild.ui：程序子窗口界面  
+main.py：程序代码文件  
+logo.png和logo.icg：程序图标  
 
 程序功能设计如下：  
 一、shell管理  
