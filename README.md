@@ -31,8 +31,8 @@ f.删除文件（ok）
   b.添加用户  
   c.修改密码  
   d.强制关机  (ok)  
-  e.格式化C盘  (ok)
-  f.开启3389  (ok)
-  g.联系作者  (ok)
-  h.退出程序    
+  e.格式化C盘  (ok)  
+  f.开启3389  (ok)  
+  g.联系作者  (ok)  
+  h.退出程序  
 五、bypass_disable_function  
