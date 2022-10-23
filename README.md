@@ -35,4 +35,3 @@ f.删除文件（ok）
   f.开启3389  (ok)  
   g.联系作者  (ok)  
   h.退出程序  
-五、bypass_disable_function  
